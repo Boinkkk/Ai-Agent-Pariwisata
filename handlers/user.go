@@ -1,22 +1,23 @@
-package controllers
+package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 	"tutorial/models"
-	"tutorial/repository"
+	"tutorial/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	repo *repository.UserRepository
+	service *service.UserService
 }
 
-func NewUserHandle(repo *repository.UserRepository) *UserHandler {
-	return &UserHandler{repo: repo}
+func NewUserHandler(service *service.UserService) *UserHandler {
+	return &UserHandler{
+		service: service,
+	}
 }
 
 func (h *UserHandler) CreateUser(c *gin.Context) {
@@ -27,11 +28,10 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
 	defer cancel()
 
-	if err := h.repo.CreateUser(ctx, &user); err != nil {
-		fmt.Println("Error Insert: ", err)
+	if err := h.service.CreateUser(ctx, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal Insert User"})
 		return
 	}
@@ -40,9 +40,4 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		"message": "user berhasil dibuat",
 		"user":    user,
 	})
-}
-
-func (h *UserHandler) GetUserByName(c *gin.Context) {
-	var user models.User
-
 }

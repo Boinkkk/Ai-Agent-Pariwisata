@@ -1,8 +1,9 @@
 package routers
 
 import (
-	"tutorial/controllers"
+	"tutorial/handlers"
 	"tutorial/repository"
+	"tutorial/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,11 +12,12 @@ import (
 func SetupRouter(db *pgxpool.Pool) *gin.Engine {
 	r := gin.Default()
 
-	userRepo := repository.NewUserRepository(db)
-	UserHandler := controllers.NewUserHandle(userRepo)
+	UserRepo := repository.NewUserRepository(db)
+	UserService := service.NewUserService(UserRepo)
+	UserHandler := handlers.NewUserHandler(UserService)
 
 	roleRepo := repository.NewRoleRepository(db)
-	RoleHandler := controllers.NewRoleHandler(roleRepo)
+	RoleHandler := handlers.NewRoleHandler(roleRepo)
 
 	r.POST("/users", UserHandler.CreateUser)
 	r.GET("/listrole", RoleHandler.GetRole)
