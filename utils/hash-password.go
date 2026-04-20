@@ -44,6 +44,9 @@ func HashPassword(password string) (string, error) {
 }
 
 func VerifyPassword(password, encodeHash string) bool {
+	fmt.Println("Input:", password)
+	fmt.Println("Length:", len(password))
+	fmt.Println("Stored hash:", encodeHash)
 	parts := strings.Split(encodeHash, ".")
 
 	if len(parts) != 2 {
@@ -54,7 +57,14 @@ func VerifyPassword(password, encodeHash string) bool {
 	salt, _ := base64.RawStdEncoding.DecodeString(parts[0])
 	hash, _ := base64.RawStdEncoding.DecodeString(parts[1])
 
+	fmt.Printf("Salt: %x\n", salt)
+
 	newHash := argon2.IDKey([]byte(password), salt, time, memory, threads, keyLen)
+
+	fmt.Printf("Stored: %x\n", hash)
+	fmt.Printf("New   : %x\n", newHash)
+
+	fmt.Println(hash, newHash)
 
 	return subtle.ConstantTimeCompare(hash, newHash) == 1
 }

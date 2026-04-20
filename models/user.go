@@ -11,7 +11,7 @@ type User struct {
 	RoleID      int       `json:"role_id"`
 	Username    string    `json:"username"`
 	Email       string    `json:"email"`
-	Password    string    `json:"password_hash"`
+	Password    string    `json:"password"`
 	FullName    string    `json:"full_name"`
 	PhoneNumber string    `json:"phone_number"`
 	CreatedAt   time.Time `json:"created_at"`
