@@ -30,6 +30,8 @@ func SetupRouter(db *pgxpool.Pool) *gin.Engine {
 	r.GET("/listrole", RoleHandler.GetRole)
 	r.POST("/login", AuthHandler.Login)
 	r.GET("/categories", CategoriesHandler.GetCategories)
+	r.POST("/categories/add", CategoriesHandler.AddCategories)
+	r.GET("/delete/categories/:id", CategoriesHandler.DeleteCategoriesByID)
 
 	return r
 }

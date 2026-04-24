@@ -47,3 +47,24 @@ func (r *CategoriesRepository) GetCategories(ctx context.Context) ([]models.Cate
 
 	return categories, nil
 }
+
+func (r *CategoriesRepository) AddCategorie(ctx context.Context, categorie *models.Categories) error {
+	query := `INSERT INTO catalog.categories (name, slug, description) VALUES ($1, $2, $3)`
+
+	_, err := r.db.Exec(ctx, query,
+		categorie.Name,
+		categorie.Slug,
+		categorie.Description,
+	)
+
+	return err
+}
+
+func (r *CategoriesRepository) DeleteCategoriesByID(ctx context.Context, ID int) error {
+	query := `DELETE FROM catalog.categories WHERE id = $1`
+
+	_, err := r.db.Exec(ctx, query, ID)
+
+	return err
+
+}

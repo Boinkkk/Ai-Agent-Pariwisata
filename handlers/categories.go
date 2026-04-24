@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
+	"tutorial/models"
 	"tutorial/repository"
 
 	"github.com/gin-gonic/gin"
@@ -36,22 +36,66 @@ func (ctg *CategoriesHandler) GetCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, categories)
 }
 
-func (ctg *CategoriesHandler) DeleteCategoriesByID(c *gin.Context) error {
+func (ctg *CategoriesHandler) AddCategories(c *gin.Context) {
+
+	var request *models.Categories
+
+	err := c.ShouldBindJSON(&request)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid Request",
+		})
+
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	err = ctg.repo.AddCategorie(ctx, request)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Request Invalid",
+			"Message": err,
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Succes",
+		"add": gin.H{
+			"name":        request.Name,
+			"slug":        request.Slug,
+			"description": request.Description,
+		},
+	})
+
+}
+
+func (ctg *CategoriesHandler) DeleteCategoriesByID(c *gin.Context) {
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	id, err := strconv.Atoi(c.Param("id"))
-
 	if err != nil {
-		fmt.Errorf("Invalid Input")
-		return err
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID",
+		})
+		return
 	}
 
 	if err := ctg.repo.DeleteCategoriesByID(ctx, id); err != nil {
-		fmt.Errorf("Id Tidak Tersedia")
-		return err
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "ID tidak tersedia",
+		})
+		return
 	}
 
-	return nil
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Kategori berhasil dihapus",
+	})
 }
