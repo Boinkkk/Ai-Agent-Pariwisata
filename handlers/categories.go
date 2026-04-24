@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 	"tutorial/repository"
 
@@ -32,4 +34,24 @@ func (ctg *CategoriesHandler) GetCategories(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, categories)
+}
+
+func (ctg *CategoriesHandler) DeleteCategoriesByID(c *gin.Context) error {
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		fmt.Errorf("Invalid Input")
+		return err
+	}
+
+	if err := ctg.repo.DeleteCategoriesByID(ctx, id); err != nil {
+		fmt.Errorf("Id Tidak Tersedia")
+		return err
+	}
+
+	return nil
 }
