@@ -19,12 +19,12 @@ func SetupRouter(db *pgxpool.Pool) *gin.Engine {
 	roleRepo := repository.NewRoleRepository(db)
 	RoleHandler := handlers.NewRoleHandler(roleRepo)
 
+	CategoriesRepo := repository.NewCategoriesRepository(db)
+	CategoriesHandler := handlers.NewCategoriesHandler(CategoriesRepo)
+
 	AuthRepo := repository.NewAuthRepository(db)
 	AuthService := service.NewAuthService(AuthRepo)
 	AuthHandler := handlers.NewAuthHandler(AuthService)
-
-	CategoriesRepo := repository.NewCategoriesRepository(db)
-	CategoriesHandler := handlers.NewCategoriesHandler(CategoriesRepo)
 
 	r.POST("/users", UserHandler.CreateUser)
 	r.GET("/listrole", RoleHandler.GetRole)
