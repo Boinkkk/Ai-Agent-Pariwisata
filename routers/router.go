@@ -26,12 +26,24 @@ func SetupRouter(db *pgxpool.Pool) *gin.Engine {
 	AuthService := service.NewAuthService(AuthRepo)
 	AuthHandler := handlers.NewAuthHandler(AuthService)
 
+	//Produk
+
+	ProductRepo := repository.NewProductRepository(db)
+	ProductHandler := handlers.NewProductHandler(ProductRepo)
+
 	r.POST("/users", UserHandler.CreateUser)
 	r.GET("/listrole", RoleHandler.GetRole)
 	r.POST("/login", AuthHandler.Login)
 	r.GET("/categories", CategoriesHandler.GetCategories)
 	r.POST("/categories/add", CategoriesHandler.AddCategories)
 	r.GET("/delete/categories/:id", CategoriesHandler.DeleteCategoriesByID)
+
+	// Produk
+	r.GET("/api/v1/products", ProductHandler.GetAllProduct)
+	r.GET("/api/v1/products/:id", ProductHandler.GetProductByID)
+	r.POST("/api/v1/products", ProductHandler.AddProduct)
+	r.PATCH("/api/v1/products/:id", ProductHandler.UpdateProductByID)
+	r.DELETE("api/v1/products/:id", ProductHandler.DeleteProductByID)
 
 	return r
 }
