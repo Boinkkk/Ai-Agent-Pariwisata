@@ -7,6 +7,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type AuthRepositoryInterface interface {
+	GetPasswordByEmail(ctx context.Context, email string) (*models.User, error)
+}
+
 type AuthRepository struct {
 	db *pgxpool.Pool
 }
@@ -25,9 +29,6 @@ func (r *AuthRepository) GetPasswordByEmail(ctx context.Context, email string) (
 		&user.Email,
 		&user.Password,
 	)
-
-	// fmt.Println(user.Password)
-
 	if err != nil {
 		return nil, err
 	}

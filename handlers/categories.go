@@ -3,99 +3,118 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 	"tutorial/models"
-	"tutorial/repository"
+	"tutorial/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CategoriesHandler struct {
-	repo *repository.CategoriesRepository
+	service service.CategoriesServiceInterface
 }
 
-func NewCategoriesHandler(repo *repository.CategoriesRepository) *CategoriesHandler {
-	return &CategoriesHandler{repo: repo}
+func NewCategoriesHandler(service service.CategoriesServiceInterface) *CategoriesHandler {
+	return &CategoriesHandler{service: service}
 }
 
-func (ctg *CategoriesHandler) GetCategories(c *gin.Context) {
+func (h *CategoriesHandler) GetCategories(c *gin.Context) {
+	h.FindAll(c)
+}
+
+func (h *CategoriesHandler) AddCategories(c *gin.Context) {
+	h.Create(c)
+}
+
+func (h *CategoriesHandler) DeleteCategoriesByID(c *gin.Context) {
+	h.Delete(c)
+}
+
+func (h *CategoriesHandler) Create(c *gin.Context) {
+	var category models.Categories
+	if err := c.ShouldBindJSON(&category); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
-
 	defer cancel()
 
-	categories, err := ctg.repo.GetCategories(ctx)
+	if err := h.service.Create(ctx, &category); err != nil {
+		handleError(c, err)
+		return
+	}
 
+	c.JSON(http.StatusCreated, category)
+}
+
+func (h *CategoriesHandler) FindByID(c *gin.Context) {
+	id, ok := parseIntParam(c, "id")
+	if !ok {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	category, err := h.service.GetByID(ctx, id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Bad Request",
-		})
+		handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, category)
+}
+
+func (h *CategoriesHandler) FindAll(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	categories, err := h.service.GetAll(ctx)
+	if err != nil {
+		handleError(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, categories)
 }
 
-func (ctg *CategoriesHandler) AddCategories(c *gin.Context) {
-
-	var request *models.Categories
-
-	err := c.ShouldBindJSON(&request)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Request",
-		})
-
+func (h *CategoriesHandler) Update(c *gin.Context) {
+	id, ok := parseIntParam(c, "id")
+	if !ok {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	var category models.Categories
+	if err := c.ShouldBindJSON(&category); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	err = ctg.repo.AddCategorie(ctx, request)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Request Invalid",
-			"Message": err,
-		})
-
+	if err := h.service.Update(ctx, id, &category); err != nil {
+		handleError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Succes",
-		"add": gin.H{
-			"name":        request.Name,
-			"slug":        request.Slug,
-			"description": request.Description,
-		},
-	})
-
+	c.JSON(http.StatusOK, gin.H{"message": "category updated"})
 }
 
-func (ctg *CategoriesHandler) DeleteCategoriesByID(c *gin.Context) {
+func (h *CategoriesHandler) Delete(c *gin.Context) {
+	id, ok := parseIntParam(c, "id")
+	if !ok {
+		return
+	}
 
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid ID",
-		})
+	if err := h.service.Delete(ctx, id); err != nil {
+		handleError(c, err)
 		return
 	}
 
-	if err := ctg.repo.DeleteCategoriesByID(ctx, id); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "ID tidak tersedia",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Kategori berhasil dihapus",
-	})
+	c.JSON(http.StatusOK, gin.H{"message": "category deleted"})
 }

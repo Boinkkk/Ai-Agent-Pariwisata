@@ -8,25 +8,27 @@ import (
 	"tutorial/utils"
 )
 
-type AuthService struct {
-	repo *repository.AuthRepository
+type AuthServiceInterface interface {
+	UserLogin(ctx context.Context, email string, password string) (*models.User, error)
 }
 
-func NewAuthService(repo *repository.AuthRepository) *AuthService {
+type AuthService struct {
+	repo repository.AuthRepositoryInterface
+}
+
+func NewAuthService(repo repository.AuthRepositoryInterface) *AuthService {
 	return &AuthService{repo: repo}
 }
 
 func (s *AuthService) UserLogin(ctx context.Context, email string, password string) (*models.User, error) {
 	user, err := s.repo.GetPasswordByEmail(ctx, email)
-
 	if err != nil {
 		return nil, err
 	}
 
 	if !utils.VerifyPassword(password, user.Password) {
-		return nil, fmt.Errorf("Wrong Password")
+		return nil, fmt.Errorf("wrong password")
 	}
 
 	return user, nil
-
 }
