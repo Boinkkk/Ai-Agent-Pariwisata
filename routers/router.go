@@ -68,6 +68,7 @@ func SetupRouter(db *pgxpool.Pool) *gin.Engine {
 	r.GET("/categories", categoriesHandler.GetCategories)
 	r.POST("/categories/add", categoriesHandler.AddCategories)
 	r.GET("/delete/categories/:id", categoriesHandler.DeleteCategoriesByID)
+	r.GET("/api/v1/products/slug/:slug", productHandler.GetProductBySlug)
 
 	api := r.Group("/api/v1")
 	registerCRUDRoutes(api, "/users", userHandler)

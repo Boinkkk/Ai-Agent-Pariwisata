@@ -12,6 +12,7 @@ type ProductServiceInterface interface {
 	GetAll(ctx context.Context) ([]models.Product, error)
 	Update(ctx context.Context, id string, product *models.Product) error
 	Delete(ctx context.Context, id string) error
+	GetBySlug(ctx context.Context, slug string) (*models.Product, error)
 }
 
 type ProductService struct {
@@ -28,6 +29,10 @@ func (s *ProductService) Create(ctx context.Context, product *models.Product) er
 
 func (s *ProductService) GetByID(ctx context.Context, id string) (*models.Product, error) {
 	return s.repo.FindByID(ctx, id)
+}
+
+func (s *ProductService) GetBySlug(ctx context.Context, slug string) (*models.Product, error) {
+	return s.repo.GetProductBySlug(ctx, slug)
 }
 
 func (s *ProductService) GetAll(ctx context.Context) ([]models.Product, error) {

@@ -17,6 +17,7 @@ type ProductRepositoryInterface interface {
 	Delete(ctx context.Context, id string) error
 	GetAllProduct(ctx context.Context) ([]models.Product, error)
 	GetProductByID(ctx context.Context, id string) (*models.Product, error)
+	GetProductBySlug(ctx context.Context, slug string) (*models.Product, error)
 	AddProduct(ctx context.Context, product *models.Product) error
 	UpdateProductByID(ctx context.Context, id string, product models.Product) error
 	DeleteProductByID(ctx context.Context, id string) error
@@ -103,6 +104,11 @@ func (r *ProductRepository) Insert(ctx context.Context, product *models.Product)
 func (r *ProductRepository) FindByID(ctx context.Context, id string) (*models.Product, error) {
 	query := productSelectQuery() + ` WHERE id = $1`
 	return r.scanProduct(r.db.QueryRow(ctx, query, id))
+}
+
+func (r *ProductRepository) FindBySlug(ctx context.Context, slug string) (*models.Product, error) {
+	query := productSelectQuery() + ` WHERE slug = $1`
+	return r.scanProduct(r.db.QueryRow(ctx, query, slug))
 }
 
 func (r *ProductRepository) FindAll(ctx context.Context) ([]models.Product, error) {
@@ -207,6 +213,10 @@ func (r *ProductRepository) GetAllProduct(ctx context.Context) ([]models.Product
 
 func (r *ProductRepository) GetProductByID(ctx context.Context, id string) (*models.Product, error) {
 	return r.FindByID(ctx, id)
+}
+
+func (r *ProductRepository) GetProductBySlug(ctx context.Context, slug string) (*models.Product, error) {
+	return r.FindBySlug(ctx, slug)
 }
 
 func (r *ProductRepository) AddProduct(ctx context.Context, product *models.Product) error {

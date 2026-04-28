@@ -4,53 +4,13 @@ import type {
   CatalogSortPreference,
   HerbalCatalogProduct,
 } from './catalogTypes'
+import { extractCatalogProducts } from './catalogProductGuards'
 
 const CATALOG_PRODUCTS_ENDPOINT =
   import.meta.env.VITE_CATALOG_PRODUCTS_ENDPOINT ?? '/api/catalog'
 
 const friendlyCatalogLoadError =
   'Katalog herbal belum bisa dimuat. Periksa koneksi atau coba lagi sebentar.'
-
-function isHerbalCatalogProduct(candidate: unknown): candidate is HerbalCatalogProduct {
-  if (!candidate || typeof candidate !== 'object') {
-    return false
-  }
-
-  const product = candidate as Partial<Record<keyof HerbalCatalogProduct, unknown>>
-
-  return (
-    typeof product.id === 'string' &&
-    typeof product.name === 'string' &&
-    typeof product.slug === 'string' &&
-    typeof product.price === 'number' &&
-    typeof product.stock_quantity === 'number' &&
-    typeof product.image_url === 'string' &&
-    typeof product.is_active === 'boolean'
-  )
-}
-
-function extractCatalogProducts(apiPayload: unknown): HerbalCatalogProduct[] {
-  if (Array.isArray(apiPayload)) {
-    return apiPayload.filter(isHerbalCatalogProduct)
-  }
-
-  if (!apiPayload || typeof apiPayload !== 'object') {
-    return []
-  }
-
-  const possiblePayload = apiPayload as {
-    data?: unknown
-    products?: unknown
-    items?: unknown
-  }
-
-  const productCollection =
-    possiblePayload.data ?? possiblePayload.products ?? possiblePayload.items
-
-  return Array.isArray(productCollection)
-    ? productCollection.filter(isHerbalCatalogProduct)
-    : []
-}
 
 function matchesCatalogSearch(product: HerbalCatalogProduct, normalizedSearchTerm: string) {
   if (!normalizedSearchTerm) {

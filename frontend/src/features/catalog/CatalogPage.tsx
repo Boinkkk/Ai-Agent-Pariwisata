@@ -13,6 +13,7 @@ import {
   User,
 } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import type {
   CatalogSortPreference,
   HerbalCatalogProduct,
@@ -208,8 +209,8 @@ function CatalogProductCard({ product }: { product: HerbalCatalogProduct }) {
 
   return (
     <article className="group">
-      <a
-        href={productDetailUrl}
+      <Link
+        to={productDetailUrl}
         className="block rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-600"
         aria-label={`Lihat detail ${product.name}`}
       >
@@ -238,7 +239,7 @@ function CatalogProductCard({ product }: { product: HerbalCatalogProduct }) {
             Stok {product.stock_quantity} - {product.regency || product.production_location}
           </p>
         </div>
-      </a>
+      </Link>
     </article>
   )
 }

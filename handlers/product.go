@@ -26,6 +26,10 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 	h.FindByID(c)
 }
 
+func (h *ProductHandler) GetProductBySlug(c *gin.Context) {
+	h.FindBySlug(c)
+}
+
 func (h *ProductHandler) AddProduct(c *gin.Context) {
 	h.Create(c)
 }
@@ -61,6 +65,19 @@ func (h *ProductHandler) FindByID(c *gin.Context) {
 	defer cancel()
 
 	product, err := h.service.GetByID(ctx, c.Param("id"))
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, product)
+}
+
+func (h *ProductHandler) FindBySlug(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	product, err := h.service.GetBySlug(ctx, c.Param("slug"))
 	if err != nil {
 		handleError(c, err)
 		return
